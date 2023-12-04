@@ -1,7 +1,10 @@
+import { FC } from "react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const Home = () => {
+import HomeNotes from "./components/home-notes";
+
+const Home: FC = () => {
   const navigate = useNavigate();
 
   return (
@@ -20,6 +23,8 @@ const Home = () => {
           </Button>
         </div>
       </div>
+
+      <HomeNotes />
     </div>
   );
 };
