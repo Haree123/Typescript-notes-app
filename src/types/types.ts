@@ -34,5 +34,5 @@ export interface keyConfig {
 }
 
 export interface RootState {
-  notes: NoteState;
+  note: NoteState;
 }

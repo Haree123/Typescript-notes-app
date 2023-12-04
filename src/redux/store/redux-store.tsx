@@ -2,23 +2,41 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 import noteReducers from "../reducers/note-reducers";
 
-import { keyConfig } from "../../types/types";
+import { RootState, keyConfig } from "../../types/types";
 import { localStorageMiddleware } from "../middlewares/localstorage-middleware";
 
 const keysToPersist: keyConfig[] = [
-  { key: "notes", reducer: "notes" },
+  { key: "notes", reducer: "note" },
   {
     key: "tags",
-    reducer: "notes",
+    reducer: "note",
   },
 ];
 
+let preloadedState: Partial<RootState> = {};
+
+keysToPersist.forEach(({ key, reducer }) => {
+  const result = localStorage.getItem(key);
+
+  if (result) {
+    const parsedResult = JSON.parse(result);
+    preloadedState = {
+      ...preloadedState,
+      [reducer]: {
+        ...(preloadedState[reducer] || { notes: [], tags: [] }),
+        [key]: parsedResult,
+      },
+    };
+  }
+});
+
 const rootReducers = combineReducers({
-  notes: noteReducers,
+  note: noteReducers,
 });
 
 export const store = configureStore({
   reducer: rootReducers,
+  preloadedState,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(localStorageMiddleware(keysToPersist)),
 });
