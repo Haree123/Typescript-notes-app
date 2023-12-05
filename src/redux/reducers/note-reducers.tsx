@@ -18,10 +18,20 @@ const NoteReducers = createSlice({
         { ...items, tagsIds: tags.map((val) => val.id) },
       ];
     },
-    createTags: (state, action: PayloadAction<Tag>) => {},
+    addTags: (state, action: PayloadAction<Tag>) => {
+      const { id, label } = action.payload;
+
+      state.tags = [
+        ...state.tags,
+        {
+          id,
+          label,
+        },
+      ];
+    },
   },
 });
 
-export const { createNote, createTags } = NoteReducers.actions;
+export const { addTags, createNote } = NoteReducers.actions;
 
 export default NoteReducers.reducer;

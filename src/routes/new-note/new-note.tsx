@@ -32,7 +32,7 @@ const NewNote: FC = () => {
         id: uuidV4(),
         markdown: values.markdown,
         title: values.title,
-        tags: [],
+        tags: values.tags,
       })
     );
 
@@ -47,6 +47,7 @@ const NewNote: FC = () => {
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={validationSchema}
+        validateOnChange={false}
         validateOnBlur={false}
         validateOnMount={false}
       >

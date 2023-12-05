@@ -1,7 +1,11 @@
 import { FC } from "react";
 import { Autocomplete, TextField } from "@mui/material";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../types/types";
 
 const HomeNotes: FC = () => {
+  const availableTags = useSelector((state: RootState) => state.note.tags);
+
   return (
     <div className="mt-14">
       <div className="flex items-center gap-3">
@@ -14,7 +18,7 @@ const HomeNotes: FC = () => {
           <p className="mb-3">Tags</p>
           <Autocomplete
             size="small"
-            options={[]}
+            options={availableTags}
             sx={{ width: "100%" }}
             renderInput={(params) => <TextField {...params} />}
           />

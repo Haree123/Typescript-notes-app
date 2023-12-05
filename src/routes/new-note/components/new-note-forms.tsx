@@ -1,20 +1,63 @@
 import { FC } from "react";
 import { Autocomplete, Button, TextField } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import { useFormikContext } from "formik";
 import { useNavigate } from "react-router-dom";
-import { debounce } from "lodash";
+import { v4 as uuidV4 } from "uuid";
 
-import { note } from "../../../types/types";
+import { RootState, Tag, note } from "../../../types/types";
+import { addTags } from "../../../redux/reducers/note-reducers";
 
 const NewNoteForms: FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const availableTags = useSelector((state: RootState) => state.note.tags);
+
   const { errors, handleSubmit, setFieldValue, values } =
     useFormikContext<note>();
-  const { markdown, title } = values;
+  const { markdown, title, tags } = values;
 
-  const handleTagsInputChange = debounce((_, inputValue) => {
-    console.log(inputValue);
-  }, 500);
+  const handleTagsChange = (
+    _: React.SyntheticEvent<Element, Event>,
+    newValue: (string | Tag)[]
+  ) => {
+    const uniqueLabelsTag = new Set(tags.map((item) => item.label));
+
+    //already created tags
+    const existingTag = newValue.filter((item) => {
+      const tagObj = item as Tag;
+      return availableTags.some((obj) => obj.label === tagObj.label);
+    });
+
+    if (existingTag) {
+      existingTag.forEach((item) => {
+        const tagObj = item as Tag;
+        if (!uniqueLabelsTag.has(tagObj.label)) {
+          setFieldValue("tags", [...tags, item]);
+        }
+      });
+    }
+
+    //not created tags
+    const nonExistingTags = newValue.filter((item) => {
+      if (typeof item === "string") {
+        return !availableTags.some((obj) => obj.label === item);
+      }
+      return false;
+    });
+
+    if (nonExistingTags) {
+      nonExistingTags.forEach((item) => {
+        const itemObj = {
+          id: uuidV4(),
+          label: typeof item === "string" ? item : "",
+        };
+
+        dispatch(addTags(itemObj));
+        setFieldValue("tags", [...tags, itemObj]);
+      });
+    }
+  };
 
   return (
     <>
@@ -44,8 +87,12 @@ const NewNoteForms: FC = () => {
               width: "100%",
             }}
             size="small"
-            options={["Helllo"]}
-            onInputChange={handleTagsInputChange}
+            getOptionLabel={(option) =>
+              typeof option === "string" ? option : option.label
+            }
+            options={availableTags}
+            value={tags}
+            onChange={handleTagsChange}
             renderInput={(params) => (
               <TextField
                 {...params}
