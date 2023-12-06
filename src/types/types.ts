@@ -28,6 +28,10 @@ export type NoteState = {
   tags: Tag[];
 };
 
+export interface SimpliedNote extends RawNote {
+  tags: Tag[];
+}
+
 export interface keyConfig {
   key: string;
   reducer: keyof RootState;
