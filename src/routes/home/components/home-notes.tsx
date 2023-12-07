@@ -52,19 +52,12 @@ type NoteCardContainerProps = {
 };
 
 const NoteCardContainer = ({ selectedTags, title }: NoteCardContainerProps) => {
-  const { notes, tags } = useSelector((state: RootState) => state.note);
-
-  const notesWithTags = useMemo(() => {
-    return notes.map((note) => {
-      return {
-        ...note,
-        tags: tags.filter((tag) => note.tagsIds.includes(tag.id)),
-      };
-    });
-  }, [notes, tags]);
+  const { notes, notesWithTags } = useSelector(
+    (state: RootState) => state.note
+  );
 
   const filteredNotes = useMemo(() => {
-    return notesWithTags.filter((note) => {
+    return notesWithTags?.filter((note) => {
       return (
         (title === "" ||
           note.title.toLowerCase().includes(title.toLowerCase())) &&
@@ -88,7 +81,7 @@ const NoteCard = ({ notes }: NoteCardProps) => {
 
   return (
     <div className="grid gap-5 grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
-      {notes.map((item, index) => {
+      {notes?.map((item, index) => {
         return (
           <div
             key={index}

@@ -1,9 +1,10 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-import { note, NoteState, Tag } from "../../types/types";
+import { note, NoteState, SimpliedNote, Tag } from "../../types/types";
 
 const noteInitialState: NoteState = {
   notes: [],
+  notesWithTags: [],
   tags: [],
 };
 
@@ -18,6 +19,27 @@ const NoteReducers = createSlice({
         { ...items, tagsIds: tags.map((val) => val.id) },
       ];
     },
+    deleteNote: (state, action: PayloadAction<Partial<note>>) => {
+      const { id } = action.payload;
+
+      if (id) {
+        state.notes = state.notes.filter((note) => note.id !== id);
+      }
+    },
+    updateNote: (state, action: PayloadAction<note>) => {
+      const { id, tags, ...items } = action.payload;
+
+      state.notes = state.notes.map((item) => {
+        if (item.id === id) {
+          return {
+            ...item,
+            ...items,
+            tagIds: tags.map((tagItem) => tagItem.id),
+          };
+        }
+        return item;
+      });
+    },
     addTags: (state, action: PayloadAction<Tag>) => {
       const { id, label } = action.payload;
 
@@ -29,9 +51,18 @@ const NoteReducers = createSlice({
         },
       ];
     },
+    createNotesWithTags: (state, action: PayloadAction<SimpliedNote[]>) => {
+      state.notesWithTags = action.payload || [];
+    },
   },
 });
 
-export const { addTags, createNote } = NoteReducers.actions;
+export const {
+  addTags,
+  createNote,
+  createNotesWithTags,
+  deleteNote,
+  updateNote,
+} = NoteReducers.actions;
 
 export default NoteReducers.reducer;

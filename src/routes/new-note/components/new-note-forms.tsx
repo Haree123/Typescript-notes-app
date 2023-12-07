@@ -1,5 +1,9 @@
-import { FC } from "react";
-import { Autocomplete, Button, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  AutocompleteChangeReason,
+  Button,
+  TextField,
+} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormikContext } from "formik";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +12,11 @@ import { v4 as uuidV4 } from "uuid";
 import { RootState, Tag, note } from "../../../types/types";
 import { addTags } from "../../../redux/reducers/note-reducers";
 
-const NewNoteForms: FC = () => {
+type NewNoteFormsProps = {
+  isEdit: boolean;
+};
+
+const NewNoteForms = ({ isEdit }: NewNoteFormsProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const availableTags = useSelector((state: RootState) => state.note.tags);
@@ -19,43 +27,53 @@ const NewNoteForms: FC = () => {
 
   const handleTagsChange = (
     _: React.SyntheticEvent<Element, Event>,
-    newValue: (string | Tag)[]
+    newValue: (string | Tag)[],
+    reason: AutocompleteChangeReason
   ) => {
-    const uniqueLabelsTag = new Set(tags.map((item) => item.label));
-
-    //already created tags
-    const existingTag = newValue.filter((item) => {
-      const tagObj = item as Tag;
-      return availableTags.some((obj) => obj.label === tagObj.label);
-    });
-
-    if (existingTag) {
-      existingTag.forEach((item) => {
-        const tagObj = item as Tag;
-        if (!uniqueLabelsTag.has(tagObj.label)) {
-          setFieldValue("tags", [...tags, item]);
-        }
-      });
+    if (reason === "removeOption" || reason === "clear") {
+      setFieldValue("tags", newValue);
     }
 
-    //not created tags
-    const nonExistingTags = newValue.filter((item) => {
-      if (typeof item === "string") {
-        return !availableTags.some((obj) => obj.label === item);
-      }
-      return false;
-    });
+    if (reason === "selectOption") {
+      const uniqueLabelsTag = new Set(tags.map((item) => item.label));
 
-    if (nonExistingTags) {
-      nonExistingTags.forEach((item) => {
-        const itemObj = {
-          id: uuidV4(),
-          label: typeof item === "string" ? item : "",
-        };
-
-        dispatch(addTags(itemObj));
-        setFieldValue("tags", [...tags, itemObj]);
+      //already created tags
+      const existingTag = newValue.filter((item) => {
+        const tagObj = item as Tag;
+        return availableTags.some((obj) => obj.label === tagObj.label);
       });
+
+      if (existingTag) {
+        existingTag.forEach((item) => {
+          const tagObj = item as Tag;
+          if (!uniqueLabelsTag.has(tagObj.label)) {
+            setFieldValue("tags", [...tags, item]);
+          }
+        });
+      }
+    }
+
+    if (reason === "createOption") {
+      //not created tags
+      const nonExistingTags = newValue.filter((item) => {
+        if (typeof item === "string") {
+          return !availableTags.some((obj) => obj.label === item);
+        }
+        return false;
+      });
+
+      if (nonExistingTags) {
+        nonExistingTags.forEach((item) => {
+          const itemObj = {
+            id: uuidV4(),
+            label: typeof item === "string" ? item : "",
+          };
+
+          dispatch(addTags(itemObj));
+          const updatedTags = [...tags, itemObj];
+          setFieldValue("tags", updatedTags);
+        });
+      }
     }
   };
 
@@ -78,8 +96,11 @@ const NewNoteForms: FC = () => {
             helperText={errors.title ? errors.title : ""}
           />
         </div>
+
         <div className="flex-1">
-          <p className="mb-3">Tags</p>
+          <p className="mb-3">
+            Tags <small>(Type and Enter to create new)</small>
+          </p>
           <Autocomplete
             multiple
             freeSolo
@@ -87,11 +108,12 @@ const NewNoteForms: FC = () => {
               width: "100%",
             }}
             size="small"
+            disableCloseOnSelect
             getOptionLabel={(option) =>
               typeof option === "string" ? option : option.label
             }
             options={availableTags}
-            value={tags}
+            value={tags ? tags : []}
             onChange={handleTagsChange}
             renderInput={(params) => (
               <TextField
@@ -129,7 +151,7 @@ const NewNoteForms: FC = () => {
           Cancel
         </Button>
         <Button variant="contained" onClick={() => handleSubmit()}>
-          Save
+          {isEdit ? "Update" : "Save"}
         </Button>
       </div>
     </>

@@ -25,6 +25,7 @@ export interface RawNote extends RawNoteItem {
 
 export type NoteState = {
   notes: RawNote[];
+  notesWithTags: SimpliedNote[];
   tags: Tag[];
 };
 

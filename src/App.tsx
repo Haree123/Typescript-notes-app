@@ -5,16 +5,35 @@ import {
   Route,
   Routes,
   useParams,
+  useOutletContext,
 } from "react-router-dom";
 import { Provider, useSelector } from "react-redux";
 
 import Home from "./routes/home/home";
 import Layout from "./components/layout";
 import NewNote from "./routes/new-note/new-note";
+import EditNote from "./routes/edit-note/edit-note";
 import ViewNote from "./routes/view-note/view-note";
 
 import { store } from "./redux/store/redux-store";
-import { RootState } from "./types/types";
+import { RootState, note } from "./types/types";
+
+const LayoutOutlet = () => {
+  const { id } = useParams();
+  const { notes, notesWithTags } = useSelector(
+    (state: RootState) => state.note
+  );
+
+  const noteIndex = notes.findIndex((item) => item.id === id);
+  const note =
+    noteIndex !== -1 ? (notesWithTags ? notesWithTags[noteIndex] : []) : [];
+
+  if (noteIndex === -1) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet context={note} />;
+};
 
 const App = () => {
   return (
@@ -27,7 +46,7 @@ const App = () => {
 
             <Route path="/:id" element={<LayoutOutlet />}>
               <Route index element={<ViewNote />} />
-              <Route path="edit" />
+              <Route path="edit" element={<EditNote />} />
             </Route>
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
@@ -39,14 +58,6 @@ const App = () => {
 
 export default App;
 
-const LayoutOutlet = () => {
-  const { id } = useParams();
-  const notes = useSelector((state: RootState) => state.note.notes);
-
-  const isExist = notes.find((item) => item.id === id);
-
-  if (!isExist) {
-    return <Navigate to="/" replace />;
-  }
-  return <Outlet />;
+export const useNote = () => {
+  return useOutletContext<note>();
 };

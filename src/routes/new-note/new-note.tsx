@@ -52,7 +52,7 @@ const NewNote: FC = () => {
         validateOnMount={false}
       >
         {() => {
-          return <NewNoteForms />;
+          return <NewNoteForms isEdit={false} />;
         }}
       </Formik>
     </div>
