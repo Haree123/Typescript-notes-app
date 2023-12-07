@@ -23,7 +23,11 @@ keysToPersist.forEach(({ key, reducer }) => {
     preloadedState = {
       ...preloadedState,
       [reducer]: {
-        ...(preloadedState[reducer] || { notes: [], tags: [] }),
+        ...(preloadedState[reducer] || {
+          notes: [],
+          notesWithTags: [],
+          tags: [],
+        }),
         [key]: parsedResult,
       },
     };
