@@ -51,6 +51,21 @@ const NoteReducers = createSlice({
         },
       ];
     },
+    deleteTags: (state, action: PayloadAction<Tag>) => {
+      const { id } = action.payload;
+
+      state.tags = state.tags.filter((tagId) => tagId.id !== id);
+    },
+    updateTag: (state, action: PayloadAction<Tag>) => {
+      const { id, label } = action.payload;
+
+      state.tags = state.tags.map((tag) => {
+        if (tag.id === id) {
+          return { ...tag, label };
+        }
+        return tag;
+      });
+    },
     createNotesWithTags: (state, action: PayloadAction<SimpliedNote[]>) => {
       state.notesWithTags = action.payload || [];
     },
@@ -59,10 +74,12 @@ const NoteReducers = createSlice({
 
 export const {
   addTags,
+  deleteTags,
+  updateTag,
   createNote,
-  createNotesWithTags,
   deleteNote,
   updateNote,
+  createNotesWithTags,
 } = NoteReducers.actions;
 
 export default NoteReducers.reducer;
